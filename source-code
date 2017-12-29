@@ -1,0 +1,140 @@
+"""Part 1: preliminary setup."""
+    #Import statements.
+import math
+from turtle import *
+
+    #Constants.
+G = 6.67e-11 #Almighty Newton constant.
+LY = 9.461e15 #Light year (distance)
+S1 = 100/LY #100 pixels per LY.
+AU = 1.496e11 #Astronomical unit (distance)
+S2 = 100/AU #100 pixels per AU.
+
+"""Part 2: object setup."""
+class object(Turtle):
+  
+  """Part 2.1: creates a new turtle with physical parameters."""
+      #Setting initial parameters to 0. Initial name is unnamed.
+  x = y = m = vx = vy = 0
+  n = ""
+  
+  """Part 2.2: returns force of attraction between objects."""
+  def force(self, other):
+        
+    """Part 2.2.1: calculate separation."""
+        #The hypot function is a shortcut for the distance formula.
+    r = math.hypot(other.x-self.x, other.y-self.y)
+        
+    """Part 2.2.2: error correction."""
+        #If separation is 0, neglect attraction => objects will pass through each other.
+        #Also, this sets the self-attraction of an object to 0.
+    if r == 0:
+      return (0, 0)
+      
+    """Part 2.2.3: calculate force and angle between objects."""
+    f = G*self.m*other.m/r**2
+    theta = math.atan2(other.y-self.y, other.x-self.x)
+    
+    """Part 2.2.4: calculate x and y component of force."""
+    fx = f*math.cos(theta)
+    fy = f*math.sin(theta)
+    
+    return fx, fy
+
+"""Part 3: iterate the force and its effects over time."""
+def motion(objects, turtles):
+  
+  """Part 3.1: setting time."""
+  dt = 24*3600
+  day_number = 1
+
+  """Part 3.2: penup to prevent drawing lines to initial positions."""
+  for i in turtles:
+    i.up()
+    i.hideturtle()
+  
+  """Part 3.3: changing position over time."""
+  while True:
+    print("Day number: ", day_number)
+    f = {}
+    
+    """Part 3.3.1: calculating force with respect to position."""
+    for i in objects:
+      netfx = netfy = 0
+      for j in objects:
+        fx, fy = i.force(j)
+        netfx += fx
+        netfy += fy
+      
+      f[i] = (netfx, netfy)
+      
+    """Part 3.3.2: calculating position with respect to time."""
+    for k in objects:
+      
+      """Part 3.3.2.1: calculate change in velocity."""
+      k.vx += (f[k][0]/k.m)*dt
+      k.vy += (f[k][1]/k.m)*dt
+      
+      """Part 3.3.2.2: calculate change in position."""
+      k.x += k.vx*dt
+      k.y += k.vy*dt
+      
+      """Part 3.3.2.3: move object to this position."""
+      
+      k.goto(k.x*S2, k.y*S2)
+      k.down()
+      print(k.n, k.x, k.y)
+    
+    print("")
+    day_number += 1
+
+"""Part 4: Setting objects with parameters in main function."""
+def main():
+  """Part 4.1: initialize objects."""
+  sun = object()
+  sun.m = 1.9891e30
+  sun.color("black")
+  sun.n = "Sun"
+  
+  mercury = object()
+  mercury.x = -AU*0.38710444025
+  mercury.m = 3.285e23
+  mercury.vy = 47856.46
+  mercury.color("red")
+  mercury.n = "Mercury"
+  
+  venus = object()
+  venus.x = -AU*0.723272326629
+  venus.m = 4.867e24
+  venus.vy = 34961.72
+  venus.color("green")
+  venus.n = "Venus"
+  
+  earth = object()
+  earth.x = -AU
+  earth.m = 5.972e24
+  earth.vy = 29780
+  earth.color("blue")
+  earth.n = "Earth"
+  
+  mars = object()
+  mars.x = -AU*1.524
+  mars.m = 6.39e23
+  mars.vy = 24070
+  mars.color("red")
+  mars.n = "Mars"
+  
+  jupiter = object()
+  jupiter.x = -AU*5.20395107469
+  jupiter.m = 1.89813e27
+  jupiter.vy = 12924.52
+  jupiter.color("brown")
+  jupiter.n = "Jupiter"
+  
+  turtles = [sun, mercury, venus, earth, mars, jupiter] #All objects created.
+  objects = [sun, mercury, venus, earth, mars] #Specific objects to simulate.
+  
+  motion(objects, turtles) #If an object is in objects but not turtles, then it will not be simulated. Therefore, by the code above (lines 52-54), they will be hidden.
+
+"""Part 5: calling function."""
+main()
